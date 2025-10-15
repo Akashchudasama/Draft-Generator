@@ -9,7 +9,6 @@ API_KEY = os.getenv("GOOGLE_API_KEY")
 st.set_page_config(page_title="📝Your Draft Agent", page_icon="📝", layout="wide")
 
 st.title("📝 Your Hindi Draft Generator")
-st.caption("Give a command; get drafts in **English** and **Hindi** using Gemini's Responses API.")
 
 with st.form("draft_form", clear_on_submit=False):
     cmd = st.text_area(
