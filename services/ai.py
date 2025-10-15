@@ -1,11 +1,13 @@
 import google.generativeai as genai
 
-# ⚠️ For testing only — better to use environment variables later
-GEMINI_API_KEY = "AIzaSyBKQe8zaCZ9ZPCuXbEZmVCIoadHHW79_-0"
+# ⚠️ For production, store your API key in environment variables instead of hardcoding
+GEMINI_API_KEY = "AIzaSyClWrx_ke-Uw30a02mxeBx1rQ5WldgE6XI"
 
+# Configure Gemini
 genai.configure(api_key=GEMINI_API_KEY)
 
-DEFAULT_MODEL = "gemini-1.5-flash"
+# Use the latest Gemini model
+DEFAULT_MODEL = "gemini-2.5-flash"
 
 def generate_draft(
     prompt: str,
@@ -30,27 +32,29 @@ def generate_draft(
     elif length_choice == "long":
         full_prompt += "\n\nProvide a detailed and extended response."
 
-    # Add bullets if requested
+    # Add bullet formatting if needed
     if bullets:
         full_prompt += "\n\nFormat the answer using bullet points where possible."
 
-    # Create model
+    # Initialize model
     gen_model = genai.GenerativeModel(model)
 
-    # Generate English
-    en_resp = gen_model.generate_content(f"{full_prompt}\n\nRespond in English only.")
-    en_text = en_resp.text if en_resp and en_resp.text else ""
+    # Helper to safely generate in each language
+    def safe_generate(prompt_text):
+        try:
+            resp = gen_model.generate_content(prompt_text)
+            return resp.text.strip() if resp and resp.text else ""
+        except Exception as e:
+            print(f"Error generating response: {e}")
+            return ""
 
-    # Generate Hindi
-    hi_resp = gen_model.generate_content(f"{full_prompt}\n\nRespond in Hindi only.")
-    hi_text = hi_resp.text if hi_resp and hi_resp.text else ""
-
-    # Generate Gujarati
-    gu_resp = gen_model.generate_content(f"{full_prompt}\n\nRespond in Gujarati only.")
-    gu_text = gu_resp.text if gu_resp and gu_resp.text else ""
+    # Generate responses
+    en_text = safe_generate(f"{full_prompt}\n\nRespond in English only.")
+    hi_text = safe_generate(f"{full_prompt}\n\nRespond in Hindi only.")
+    gu_text = safe_generate(f"{full_prompt}\n\nRespond in Gujarati only.")
 
     return {
-        "english": en_text.strip(),
-        "hindi": hi_text.strip(),
-        "gujarati": gu_text.strip(),
+        "english": en_text,
+        "hindi": hi_text,
+        "gujarati": gu_text,
     }
